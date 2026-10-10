@@ -1,0 +1,5 @@
+{
+  "ignore": ["outbox/*", "node_modules/*"],
+  "ext": "js,json",
+  "restartable": "rs"
+}

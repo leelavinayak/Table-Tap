@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { font-size: 13.5px; scroll-behavior: smooth; }
+body { @apply bg-[#f8f9fa] text-[#191c1d] font-sans antialiased; font-size: 0.92rem; line-height: 1.6; }
+
+/* Keep anchored sections clear of the sticky navbar (h-20 = 80px) */
+section[id] { scroll-margin-top: 88px; }
+.font-display { font-family: 'Plus Jakarta Sans', Inter, sans-serif; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* Dual-direction logo marquee */
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes scroll-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.animate-scroll-left { animation: scroll-left 28s linear infinite; }
+.animate-scroll-right { animation: scroll-right 32s linear infinite; }
+.marquee-paused:hover .animate-scroll-left,
+.marquee-paused:hover .animate-scroll-right { animation-play-state: paused; }
+.material-symbols-outlined { font-size: 1.1em; }
