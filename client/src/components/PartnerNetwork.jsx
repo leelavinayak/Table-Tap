@@ -69,8 +69,8 @@ export default function PartnerNetwork() {
       </div>
 
       {/* Row 1 — scrolls left, logos only (admin-added) */}
-      <div className="mt-6 overflow-hidden marquee-paused">
-        <div className="flex gap-5 w-max animate-scroll-left px-3">
+      <div className="mt-8 overflow-hidden marquee-paused">
+        <div className="flex gap-8 md:gap-12 w-max animate-scroll-left px-4 py-1">
           {[...rowA, ...rowA].map((r, i) => (
             <LogoOnly key={`a-${i}-${r.name}`} name={r.name} image={r.image} />
           ))}
@@ -78,8 +78,8 @@ export default function PartnerNetwork() {
       </div>
 
       {/* Row 2 — scrolls right, logos only (admin-added) */}
-      <div className="mt-5 overflow-hidden marquee-paused">
-        <div className="flex gap-5 w-max animate-scroll-right px-3">
+      <div className="mt-8 overflow-hidden marquee-paused">
+        <div className="flex gap-8 md:gap-12 w-max animate-scroll-right px-4 py-1">
           {[...rowB, ...rowB].map((r, i) => (
             <LogoOnly key={`b-${i}-${r.name}`} name={r.name} image={r.image} />
           ))}
