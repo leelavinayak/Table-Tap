@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export default function SupportPage() {
-  const [form, setForm] = useState({ name: '', email: '', topic: 'General help', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', topic: 'General help', message: '' });
   const [sent, setSent] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -47,13 +47,19 @@ export default function SupportPage() {
           <div>
             <label className="text-xs font-bold uppercase text-mute">Your name *</label>
             <input required value={form.name} onChange={e => set('name', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="Your name" />
+              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="table table" />
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-mute">Email *</label>
             <input required type="email" value={form.email} onChange={e => set('email', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="you@venue.com" />
+              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="tabletab@gmail.com" />
           </div>
+        </div>
+        <div>
+          <label className="text-xs font-bold uppercase text-mute">Mobile Number *</label>
+          <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+            inputMode="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
+            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+91 9999999999" />
         </div>
         <div>
           <label className="text-xs font-bold uppercase text-mute">Topic</label>

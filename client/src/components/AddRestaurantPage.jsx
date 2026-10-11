@@ -78,19 +78,19 @@ export default function AddRestaurantPage() {
         <div>
           <label className="text-xs font-bold uppercase text-mute">Restaurant name *</label>
           <input required value={form.restaurantName} onChange={e => set('restaurantName', e.target.value)}
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="e.g. Osteria Stella" />
+            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="table table" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-xs font-bold uppercase text-mute">Work email *</label>
             <input required type="email" value={form.email} onChange={e => set('email', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="gm@osteriastella.com" />
+              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="tabletab@gmail.com" />
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-mute">Mobile Number *</label>
-            <input required value={form.phone} onChange={e => set('phone', e.target.value)}
+            <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
               inputMode="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+1 555 000 1234" />
+              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+91 9999999999" />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

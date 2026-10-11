@@ -107,18 +107,18 @@ export default function PilotCta() {
             <div>
               <label className="text-xs uppercase font-bold text-gray-500">Restaurant Name *</label>
               <input required value={form.restaurantName} onChange={e => setForm({ ...form, restaurantName: e.target.value })}
-                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="e.g. Osteria Stella" />
+                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="table table" />
             </div>
             <div>
               <label className="text-xs uppercase font-bold text-gray-500">Work Email *</label>
               <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="gm@osteriastella.com" />
+                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="tabletab@gmail.com" />
             </div>
             <div>
               <label className="text-xs uppercase font-bold text-gray-500">Mobile Number *</label>
-              <input required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                inputMode="tel" pattern="[0-9+\\-\\s]{7,15}" title="Enter a valid mobile number"
-                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+1 555 000 1234" />
+              <input required type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                inputMode="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
+                className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+91 9999999999" />
             </div>
             <div>
               <label className="text-xs uppercase font-bold text-gray-500">Upload Restaurant Logo / Image *</label>

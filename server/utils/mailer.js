@@ -2,19 +2,35 @@ const nodemailer = require('nodemailer');
 
 let transporter = null;
 
+function cleanUser(v) {
+  return String(v || '').trim().replace(/^["']|["']$/g, '').trim();
+}
+
+function cleanPass(v) {
+  // Gmail shows App Password as "xxxx xxxx xxxx xxxx" — spaces are display-only.
+  // Also strip surrounding quotes if pasted from .env editors, and all whitespace.
+  return String(v || '').trim().replace(/^["']|["']$/g, '').replace(/\s+/g, '');
+}
+
 function getTransporter() {
   if (transporter) return transporter;
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  const SMTP_HOST = cleanUser(process.env.SMTP_HOST);
+  const SMTP_PORT = String(process.env.SMTP_PORT || '587').trim();
+  const SMTP_USER = cleanUser(process.env.SMTP_USER);
+  const SMTP_PASS = cleanPass(process.env.SMTP_PASS);
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn('[mailer] Missing SMTP config (need SMTP_HOST/SMTP_USER/SMTP_PASS in server/.env). Emails will be skipped.');
     return null;
+  }
+  if (SMTP_PASS.length !== 16) {
+    console.warn(`[mailer] SMTP_PASS length is ${SMTP_PASS.length}, expected 16 chars for a Gmail App Password. You may be using your normal Gmail password (wrong) or a truncated/revoked key.`);
   }
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: Number(SMTP_PORT || 587),
     secure: Number(SMTP_PORT) === 465, // true for 465, false for 587
     requireTLS: Number(SMTP_PORT) !== 465,
-    auth: { user: SMTP_USER, pass: SMTP_PASS.replace(/\s+/g, '') },
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
     connectionTimeout: 6000,
     greetingTimeout: 6000,
     socketTimeout: 10000
@@ -33,7 +49,9 @@ async function verifyMailer() {
     const msg = err.message || String(err);
     let fix = '';
     if (/535|Username and Password not accepted|BadCredentials/i.test(msg)) {
-      fix = 'Gmail rejected login. This is ALWAYS an App-Password issue: 1) Google Account → Security → 2-Step Verification ON. 2) Security → App passwords → create new Mail password. 3) Copy 16 chars into server/.env SMTP_PASS (no spaces needed). 4) Ensure SMTP_USER is the same Gmail account. 5) Restart server. Old/revoked passwords give exactly this 535 error.';
+      const user = cleanUser(process.env.SMTP_USER);
+      const passLen = cleanPass(process.env.SMTP_PASS).length;
+      fix = `Gmail rejected login for ${user || '(no SMTP_USER)'} (pass length ${passLen}, want 16). Fix: 1) myaccount.google.com → Security → 2-Step Verification ON. 2) Search "App passwords" → create Mail password. 3) Put the 16 chars in server/.env SMTP_PASS. 4) SMTP_USER must equal the account that created it. 5) Restart server. Note: changing your Google password revokes old App Passwords; normal login password NEVER works for SMTP. Run: npm run setup-mail`;
     }
     return { ok: false, error: msg, fix };
   }

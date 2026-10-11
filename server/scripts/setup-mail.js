@@ -54,15 +54,16 @@ function loadEnv() {
   console.log('  3) Copy the 16-letter code\n');
 
   const cur = loadEnv();
-  const user = await ask(`Gmail address [${cur.SMTP_USER || 'you@gmail.com'}]: `) || cur.SMTP_USER || '';
-  const pass = await ask('16-letter App Password (spaces ok): ', true);
+  const user = (await ask(`Gmail address [${cur.SMTP_USER || 'you@gmail.com'}]: `) || cur.SMTP_USER || '').trim().replace(/^["']|["']$/g, '');
+  const rawPass = await ask('16-letter App Password (spaces ok): ', true);
+  const pass = String(rawPass || '').trim().replace(/^["']|["']$/g, '').replace(/\s+/g, '');
   if (!user || !pass) { console.log('Both required. Aborted.'); process.exit(1); }
   const admin = await ask(`Admin notification email [${cur.ADMIN_EMAIL || user}]: `) || cur.ADMIN_EMAIL || user;
 
   console.log('\nVerifying with Gmail...');
   const tx = nodemailer.createTransport({
     host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true,
-    auth: { user, pass: pass.replace(/\s+/g, '') },
+    auth: { user, pass },
     connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 12000
   });
   try {
@@ -79,7 +80,7 @@ function loadEnv() {
     process.exit(1);
   }
 
-  const next = { ...cur, SMTP_HOST: 'smtp.gmail.com', SMTP_PORT: '587', SMTP_USER: user, SMTP_PASS: pass.replace(/\s+/g, ''), MAIL_FROM: `Table Tap <${user}>`, ADMIN_EMAIL: admin };
+  const next = { ...cur, SMTP_HOST: 'smtp.gmail.com', SMTP_PORT: '587', SMTP_USER: user, SMTP_PASS: pass, MAIL_FROM: `Table Tap <${user}>`, ADMIN_EMAIL: admin };
   const order = ['PORT', 'MONGO_URI', 'CLIENT_URL', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'MAIL_FROM', 'ADMIN_EMAIL'];
   const lines = order.filter(k => next[k] !== undefined).map(k => `${k}=${next[k]}`);
   for (const k of Object.keys(next)) if (!order.includes(k)) lines.push(`${k}=${next[k]}`);
