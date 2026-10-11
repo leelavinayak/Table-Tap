@@ -28,7 +28,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <div className="max-w-7xl mx-auto px-5 md:px-8 py-10 min-h-[60vh]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 py-6 md:py-10 min-h-[60vh]">
       <a href="#/" className="inline-flex items-center gap-1 text-xs font-bold text-mute hover:text-ink">
         <span className="material-symbols-outlined text-base">arrow_back</span> Back to home
       </a>

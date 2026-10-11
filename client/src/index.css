@@ -25,3 +25,32 @@ section[id] { scroll-margin-top: 88px; }
 .marquee-paused:hover .animate-scroll-left,
 .marquee-paused:hover .animate-scroll-right { animation-play-state: paused; }
 .material-symbols-outlined { font-size: 1.1em; }
+
+/* ---- Premium mobile-first form system ---- */
+@layer components {
+  .tt-label { @apply block text-[11px] font-bold uppercase tracking-[0.08em] text-mute; }
+  .tt-input {
+    @apply mt-1.5 w-full px-4 py-3 rounded-xl bg-soft border border-transparent
+      text-base sm:text-sm text-ink placeholder:text-gray-400 placeholder:font-normal
+      outline-none transition-all duration-200;
+  }
+  .tt-input:focus {
+    @apply bg-white border-ink ring-2 ring-ink/10 shadow-[0_8px_24px_-12px_rgba(12,16,20,0.35)];
+  }
+  .tt-card {
+    @apply bg-white border border-line rounded-3xl shadow-[0_20px_60px_-24px_rgba(12,16,20,0.25)];
+  }
+  .tt-btn-primary {
+    @apply w-full py-3.5 rounded-xl bg-ink text-white text-sm font-bold shadow-[0_12px_28px_-12px_rgba(12,16,20,0.6)]
+      hover:bg-char active:scale-[0.99] transition disabled:opacity-60 flex items-center justify-center gap-2;
+  }
+}
+
+/* Prevent iOS auto-zoom on focus: inputs must be >=16px on mobile */
+@media (max-width: 640px) {
+  input, select, textarea { font-size: 16px !important; }
+  /* Tighter premium page rhythm on phones */
+  section[id] { scroll-margin-top: 76px; }
+}
+/* Softer tap highlight + smoother scroll */
+* { -webkit-tap-highlight-color: transparent; }

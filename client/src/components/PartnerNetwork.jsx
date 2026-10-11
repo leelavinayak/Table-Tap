@@ -59,8 +59,8 @@ export default function PartnerNetwork() {
   const rowB = list.slice(mid);
 
   return (
-    <section id="partners" className="w-full py-10 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 text-center flex flex-col gap-2">
+    <section id="partners" className="w-full py-10 sm:py-14 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 text-center flex flex-col gap-2">
         <div className="text-[11px] uppercase tracking-widest text-mute font-bold">Global Footprint</div>
         <h2 className="font-display font-extrabold text-xl md:text-2xl tracking-tight">Trusted by Premier Dining Destinations</h2>
         <div className="inline-flex items-center justify-center gap-2 mt-1">

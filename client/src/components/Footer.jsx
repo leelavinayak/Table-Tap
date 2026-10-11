@@ -19,7 +19,7 @@ const sections = [
 export default function Footer() {
   return (
     <footer className="w-full bg-[#f3f4f5] border-t border-line">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 py-10 md:py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2">
             <img src="/Table_Tap_Logo.png" alt="Table Tap Logo" className="w-9 h-9 rounded-full object-cover bg-white shadow-sm" />

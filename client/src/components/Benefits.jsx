@@ -12,8 +12,8 @@ const restaurantPoints = [
 
 export default function Benefits() {
   return (
-    <section id="benefits" className="w-full py-10 bg-[#f3f4f5]">
-      <div className="max-w-7xl mx-auto px-5 md:px-8">
+    <section id="benefits" className="w-full py-10 sm:py-14 bg-[#f3f4f5]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8">
         <div className="text-center max-w-2xl mx-auto">
           <div className="text-[11px] uppercase tracking-widest text-mute font-bold">Why Table Tap</div>
           <h2 className="font-display font-extrabold text-xl md:text-2xl tracking-tight mt-1">

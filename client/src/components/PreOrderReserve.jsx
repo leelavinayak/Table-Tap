@@ -6,8 +6,8 @@ const steps = [
 
 export default function PreOrderReserve() {
   return (
-    <section id="preorder" className="w-full py-10 bg-white">
-      <div className="max-w-7xl mx-auto px-5 md:px-8">
+    <section id="preorder" className="w-full py-10 sm:py-14 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8">
         <div className="text-center max-w-2xl mx-auto">
           <div className="text-[11px] uppercase tracking-widest text-mute font-bold">Pre-order + Reserved Tables</div>
           <h2 className="font-display font-extrabold text-xl md:text-2xl tracking-tight mt-1">

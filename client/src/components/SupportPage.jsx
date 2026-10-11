@@ -12,28 +12,28 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-5 md:px-8 py-10 min-h-[60vh]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 py-6 md:py-10 min-h-[60vh]">
       <a href="#/" className="inline-flex items-center gap-1 text-xs font-bold text-mute hover:text-ink">
         <span className="material-symbols-outlined text-base">arrow_back</span> Back to home
       </a>
       <div className="mt-2"><span className="inline-block px-3 py-1 rounded-full bg-ink text-white text-xs font-extrabold">Support</span></div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-3">
       <div>
-        <h1 className="font-display font-extrabold text-2xl md:text-3xl tracking-tight">Support & Contact</h1>
-        <p className="text-sm text-mute mt-2">
+        <h1 className="font-display font-extrabold text-[24px] sm:text-2xl md:text-3xl tracking-tight leading-tight">Support & Contact</h1>
+        <p className="text-[15px] sm:text-sm text-mute mt-2 leading-relaxed">
           Questions about joining, pricing, hardware kits or your live venue? Reach us — we reply within one business day.
         </p>
-        <div className="mt-4 space-y-3 text-sm">
-          <div className="flex items-center gap-2 bg-white border border-line rounded-xl p-3">
-            <span className="material-symbols-outlined">mail</span>
-            <span><span className="font-bold">Email:</span> leelavinayakkothakota155@gmail.com</span>
+        <div className="mt-4 space-y-2.5 text-sm">
+          <div className="flex items-center gap-2.5 bg-white border border-line rounded-2xl p-3.5 shadow-sm">
+            <span className="w-9 h-9 rounded-xl bg-soft flex items-center justify-center shrink-0"><span className="material-symbols-outlined">mail</span></span>
+            <span className="break-all"><span className="font-bold">Email:</span> leelavinayakkothakota155@gmail.com</span>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-line rounded-xl p-3">
-            <span className="material-symbols-outlined">call</span>
+          <div className="flex items-center gap-2.5 bg-white border border-line rounded-2xl p-3.5 shadow-sm">
+            <span className="w-9 h-9 rounded-xl bg-soft flex items-center justify-center shrink-0"><span className="material-symbols-outlined">call</span></span>
             <span><span className="font-bold">Phone:</span> +91 8523086151 · Mon–Fri, 9am–9pm</span>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-line rounded-xl p-3">
-            <span className="material-symbols-outlined">chat</span>
+          <div className="flex items-center gap-2.5 bg-white border border-line rounded-2xl p-3.5 shadow-sm">
+            <span className="w-9 h-9 rounded-xl bg-soft flex items-center justify-center shrink-0"><span className="material-symbols-outlined">chat</span></span>
             <span><span className="font-bold">Live chat:</span> from the ordering app → Call Server → Help</span>
           </div>
         </div>
@@ -42,29 +42,29 @@ export default function SupportPage() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="bg-white border border-line rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <form onSubmit={submit} className="tt-card p-5 sm:p-6 flex flex-col gap-4 h-fit">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
           <div>
-            <label className="text-xs font-bold uppercase text-mute">Your name *</label>
+            <label className="tt-label">Your name *</label>
             <input required value={form.name} onChange={e => set('name', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="table table" />
+              className="tt-input" placeholder="table table" />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase text-mute">Email *</label>
+            <label className="tt-label">Email *</label>
             <input required type="email" value={form.email} onChange={e => set('email', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="tabletab@gmail.com" />
+              className="tt-input" placeholder="tabletab@gmail.com" />
           </div>
         </div>
         <div>
-          <label className="text-xs font-bold uppercase text-mute">Mobile Number *</label>
+          <label className="tt-label">Mobile Number *</label>
           <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
-            inputMode="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+91 9999999999" />
+            inputMode="tel" autoComplete="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
+            className="tt-input" placeholder="+91 9999999999" />
         </div>
         <div>
-          <label className="text-xs font-bold uppercase text-mute">Topic</label>
+          <label className="tt-label">Topic</label>
           <select value={form.topic} onChange={e => set('topic', e.target.value)}
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black">
+            className="tt-input">
             <option>General help</option>
             <option>Joining / Pricing</option>
             <option>Hardware kits</option>
@@ -73,11 +73,11 @@ export default function SupportPage() {
           </select>
         </div>
         <div>
-          <label className="text-xs font-bold uppercase text-mute">Message *</label>
+          <label className="tt-label">Message *</label>
           <textarea required rows={5} value={form.message} onChange={e => set('message', e.target.value)}
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="How can we help?" />
+            className="tt-input resize-none" placeholder="How can we help?" />
         </div>
-        <button className="w-full py-3 rounded-xl bg-ink text-white text-sm font-bold">Send message</button>
+        <button className="tt-btn-primary">Send message</button>
         {sent && <div className="text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg p-2.5">✓ Message received! Our team will reply to {form.email || 'your email'} soon.</div>}
       </form>
       </div>

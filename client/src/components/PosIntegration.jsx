@@ -2,8 +2,8 @@ const pos = ['Toast POS', 'Square for Restaurants', 'Clover Hospitality', 'NCR A
 
 export default function PosIntegration() {
   return (
-    <section id="pos" className="w-full py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+    <section id="pos" className="w-full py-10 sm:py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         <div className="lg:col-span-7 flex flex-col gap-6">
           <div>
             <h2 className="font-display font-extrabold text-xl md:text-2xl tracking-tight mt-1.5">Plugs into Your Existing POS in Under 20 Minutes</h2>

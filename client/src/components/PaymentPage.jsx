@@ -74,7 +74,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-5 md:px-8 py-10 min-h-[60vh]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 py-6 md:py-10 min-h-[60vh]">
       <a href="#/add-restaurant" className="inline-flex items-center gap-1 text-xs font-bold text-mute hover:text-ink">
         <span className="material-symbols-outlined text-base">arrow_back</span> Back to restaurant details
       </a>
@@ -151,9 +151,9 @@ export default function PaymentPage() {
 
       {step === 'pay' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
-          <form onSubmit={pay} className="bg-white border border-line rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-            <div className="font-bold">Payment details</div>
-            <div className="text-sm text-mute -mt-2">Paying for <b className="text-ink">{pkg.name} ({pkg.price})</b></div>
+          <form onSubmit={pay} className="tt-card p-5 sm:p-6 flex flex-col gap-4">
+            <div className="font-bold text-[17px]">Payment details</div>
+            <div className="text-sm text-mute -mt-3">Paying for <b className="text-ink">{pkg.name} ({pkg.price})</b></div>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { id: 'upi', label: 'UPI', icon: 'qr_code_2' },
@@ -163,7 +163,7 @@ export default function PaymentPage() {
                   key={m.id}
                   type="button"
                   onClick={() => setPayMethod(m.id)}
-                  className={`py-2.5 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 ${payMethod === m.id ? 'bg-ink text-white border-ink' : 'bg-gray-50 border-line'}`}
+                  className={`py-3 rounded-xl border text-sm font-bold flex items-center justify-center gap-2 transition active:scale-[0.99] ${payMethod === m.id ? 'bg-ink text-white border-ink' : 'bg-soft border-line'}`}
                 >
                   <span className="material-symbols-outlined text-base">{m.icon}</span>{m.label}
                 </button>
@@ -171,30 +171,30 @@ export default function PaymentPage() {
             </div>
             {payMethod === 'upi' ? (
               <div>
-                <label className="text-xs font-bold uppercase text-mute">UPI ID</label>
-                <input required placeholder="yourname@upi" className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" />
+                <label className="tt-label">UPI ID</label>
+                <input required placeholder="yourname@upi" autoComplete="off" className="tt-input" />
               </div>
             ) : (
               <>
                 <div>
-                  <label className="text-xs font-bold uppercase text-mute">Card number</label>
-                  <input required inputMode="numeric" placeholder="1234 5678 9012 3456" className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" />
+                  <label className="tt-label">Card number</label>
+                  <input required inputMode="numeric" autoComplete="cc-number" placeholder="1234 5678 9012 3456" className="tt-input" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4 sm:gap-3">
                   <div>
-                    <label className="text-xs font-bold uppercase text-mute">Expiry</label>
-                    <input required placeholder="MM/YY" className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" />
+                    <label className="tt-label">Expiry</label>
+                    <input required placeholder="MM/YY" autoComplete="cc-exp" className="tt-input" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold uppercase text-mute">CVV</label>
-                    <input required inputMode="numeric" type="password" placeholder="•••" className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" />
+                    <label className="tt-label">CVV</label>
+                    <input required inputMode="numeric" type="password" autoComplete="cc-csc" placeholder="•••" className="tt-input" />
                   </div>
                 </div>
               </>
             )}
             <div className="flex gap-2">
-              <button type="button" onClick={() => setStep('select')} className="px-4 py-3 rounded-xl bg-gray-100 text-sm font-bold">Back</button>
-              <button disabled={paying} className="flex-1 py-3 rounded-xl bg-ink text-white text-sm font-bold disabled:opacity-60 flex items-center justify-center gap-2">
+              <button type="button" onClick={() => setStep('select')} className="px-5 py-3.5 rounded-xl bg-soft text-sm font-bold active:scale-[0.99] transition">Back</button>
+              <button disabled={paying} className="flex-1 py-3.5 rounded-xl bg-ink text-white text-sm font-bold disabled:opacity-60 flex items-center justify-center gap-2 shadow-[0_12px_28px_-12px_rgba(12,16,20,0.6)] active:scale-[0.99] transition">
                 <span className="material-symbols-outlined text-base">lock</span>
                 {paying ? 'Processing…' : `Pay ${pkg.price}`}
               </button>
@@ -202,7 +202,7 @@ export default function PaymentPage() {
             <div className="text-center text-[11px] text-mute">Demo checkout — no real money is charged.</div>
           </form>
 
-          <div className="bg-ink text-white rounded-2xl p-6 h-fit flex flex-col gap-2">
+          <div className="bg-ink text-white rounded-3xl p-5 sm:p-6 h-fit flex flex-col gap-2 shadow-xl">
             <div className="font-bold">Order summary</div>
             <div className="text-sm text-gray-300">Restaurant: <b className="text-white">{restaurant?.restaurantName || '—'}</b></div>
             <div className="text-sm text-gray-300">GST: <b className="text-white">{restaurant?.gst || '—'}</b></div>

@@ -37,15 +37,15 @@ export default function AddRestaurantPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-5 md:px-8 py-10 min-h-[60vh]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 py-6 md:py-10 min-h-[60vh]">
       <a href="#/" className="inline-flex items-center gap-1 text-xs font-bold text-mute hover:text-ink">
         <span className="material-symbols-outlined text-base">arrow_back</span> Back to home
       </a>
       <div className="mt-2"><span className="inline-block px-3 py-1 rounded-full bg-ink text-white text-xs font-extrabold">Add Restaurant</span></div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-3">
       <div>
-        <h1 className="font-display font-extrabold text-2xl md:text-3xl tracking-tight">Add your restaurant to Table Tap</h1>
-        <p className="text-sm text-mute mt-2">
+        <h1 className="font-display font-extrabold text-[24px] sm:text-2xl md:text-3xl tracking-tight leading-tight">Add your restaurant to Table Tap</h1>
+        <p className="text-[15px] sm:text-sm text-mute mt-2 leading-relaxed">
           Tell us about your venue — we ship QR/NFC stands in 48 hours and connect your POS in under 20 minutes.
         </p>
         <ul className="mt-4 space-y-2.5 text-sm">
@@ -72,47 +72,47 @@ export default function AddRestaurantPage() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="bg-white border border-line rounded-2xl p-6 shadow-sm flex flex-col gap-3 h-fit">
-        <div className="font-bold">Add Your Restaurant</div>
-        <div className="text-sm text-mute -mt-2">Simple enquiry — no logo needed here.</div>
+      <form onSubmit={submit} className="tt-card p-5 sm:p-6 flex flex-col gap-4 h-fit">
+        <div className="font-bold text-[17px]">Add Your Restaurant</div>
+        <div className="text-sm text-mute -mt-3">Simple enquiry — no logo needed here.</div>
         <div>
-          <label className="text-xs font-bold uppercase text-mute">Restaurant name *</label>
+          <label className="tt-label">Restaurant name *</label>
           <input required value={form.restaurantName} onChange={e => set('restaurantName', e.target.value)}
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="table table" />
+            className="tt-input" placeholder="table table" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
           <div>
-            <label className="text-xs font-bold uppercase text-mute">Work email *</label>
+            <label className="tt-label">Work email *</label>
             <input required type="email" value={form.email} onChange={e => set('email', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="tabletab@gmail.com" />
+              className="tt-input" placeholder="tabletab@gmail.com" />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase text-mute">Mobile Number *</label>
+            <label className="tt-label">Mobile Number *</label>
             <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
-              inputMode="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="+91 9999999999" />
+              inputMode="tel" autoComplete="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid mobile number"
+              className="tt-input" placeholder="+91 9999999999" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
           <div>
-            <label className="text-xs font-bold uppercase text-mute">City</label>
+            <label className="tt-label">City</label>
             <input value={form.city} onChange={e => set('city', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="New York" />
+              className="tt-input" placeholder="New York" />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase text-mute">No. of tables</label>
+            <label className="tt-label">No. of tables</label>
             <input value={form.tables} onChange={e => set('tables', e.target.value)}
-              className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm focus:outline-none focus:ring-2 ring-black" placeholder="e.g. 40" />
+              inputMode="numeric" className="tt-input" placeholder="e.g. 40" />
           </div>
         </div>
         <div>
-          <label className="text-xs font-bold uppercase text-mute">GST Number *</label>
+          <label className="tt-label">GST Number *</label>
           <input required value={form.gst} onChange={e => set('gst', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15))}
             minLength={15} maxLength={15} pattern="[A-Z0-9]{15}" title="Enter 15-character GSTIN, e.g. 22AAAAA0000A1Z5"
-            className="mt-1 w-full px-3 py-2.5 rounded-lg bg-gray-100 text-sm uppercase focus:outline-none focus:ring-2 ring-black" placeholder="e.g. 22AAAAA0000A1Z5" />
+            className="tt-input uppercase" placeholder="e.g. 22AAAAA0000A1Z5" />
           <div className="text-[11px] text-mute mt-1">15-character GSTIN of the restaurant.</div>
         </div>
-        <button disabled={state.loading} className="w-full py-3 rounded-xl bg-ink text-white text-sm font-bold disabled:opacity-60">
+        <button disabled={state.loading} className="tt-btn-primary">
           {state.loading ? 'Submitting…' : 'Submit Restaurant'}
         </button>
         {state.ok && <div className="text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg p-2.5">✓ Received! Redirecting to pricing & joining price…</div>}

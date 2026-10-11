@@ -18,19 +18,19 @@ export default function Navbar() {
   return (
     <>
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-line">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <a href="#/" className="flex items-center gap-3">
-            <img src="/Table_Tap_Logo.png" alt="Table Tap Logo" className="w-12 h-12 rounded-full object-cover bg-white shadow-sm" />
+          <a href="#/" className="flex items-center gap-2.5">
+            <img src="/Table_Tap_Logo.png" alt="Table Tap Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover bg-white shadow-sm ring-1 ring-line" />
             <div className="leading-tight">
-              <div className="font-display font-extrabold text-2xl tracking-tight">Table Tap</div>
+              <div className="font-display font-extrabold text-xl md:text-2xl tracking-tight">Table Tap</div>
             </div>
           </a>
         </div>
         <div className="flex items-center">
           <button
             onClick={() => setShowComingSoon(true)}
-            className="px-5 py-2.5 rounded-xl bg-ink text-white text-sm font-bold shadow hover:bg-char flex items-center gap-2"
+            className="px-4 md:px-5 py-2.5 rounded-xl bg-ink text-white text-sm font-bold shadow-[0_10px_24px_-10px_rgba(12,16,20,0.6)] hover:bg-char active:scale-[0.98] transition flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-lg">smartphone</span>
             Get the App

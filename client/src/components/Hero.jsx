@@ -48,35 +48,35 @@ export default function Hero() {
   const openApp = () => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
 
   return (
-    <section className="w-full bg-cream py-8 lg:py-0 lg:min-h-[calc(100vh-5rem)] flex items-center">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
-        <div className="lg:col-span-7 flex flex-col gap-4">
+    <section className="w-full bg-cream py-8 sm:py-10 lg:py-0 lg:min-h-[calc(100vh-5rem)] flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center w-full">
+        <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-5">
           {/* <div className="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-white border border-line text-[12px] font-semibold uppercase tracking-wide">
             <span className="w-2 h-2 rounded-full bg-ink animate-pulse"></span>
             No App Download Required • Instant PWA
           </div> */}
           <div>
-            <h1 className="font-display font-extrabold tracking-tight text-2xl md:text-4xl leading-[1.1]">
+            <h1 className="font-display font-extrabold tracking-tight text-[26px] leading-[1.12] sm:text-3xl md:text-4xl sm:leading-[1.1]">
               Order & Reorder from Your Table. <span className="text-mute font-bold">Zero Waiter Delays.</span>
             </h1>
-            <p className="mt-3 text-sm text-mute max-w-2xl">
+            <p className="mt-3 text-[15px] sm:text-sm text-mute max-w-2xl leading-relaxed">
               Empowering diners to scan the interactive QR stand, explore real-time digital menus, fire kitchen tickets instantly, and request another round in 2 taps—without flagging down busy servers.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2.5">
             <button onClick={openApp}
-              className="px-4 py-2 rounded-lg bg-ink text-white text-sm font-semibold shadow hover:bg-char flex items-center gap-2">
+              className="w-full sm:w-auto justify-center px-5 py-3 rounded-xl bg-ink text-white text-sm font-bold shadow-[0_12px_28px_-12px_rgba(12,16,20,0.6)] hover:bg-char active:scale-[0.99] transition flex items-center gap-2">
               Try Interactive Demo <span className="material-symbols-outlined text-base">arrow_forward</span>
             </button>
             <button onClick={() => document.getElementById('partners')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-4 py-2 rounded-lg bg-white border border-line text-sm font-semibold shadow-sm flex items-center gap-2">
+              className="w-full sm:w-auto justify-center px-5 py-3 rounded-xl bg-white border border-line text-sm font-bold shadow-sm active:scale-[0.99] transition flex items-center gap-2">
               <span className="material-symbols-outlined text-base">storefront</span> View 540+ Partner Restaurants
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-4 pt-2">
-            <div><div className="font-display font-extrabold text-lg">42s</div><div className="text-xs text-mute">Table-to-Kitchen routing</div></div>
-            <div><div className="font-display font-extrabold text-lg">+32%</div><div className="text-xs text-mute">Drink & dessert reorders</div></div>
-            <div><div className="font-display font-extrabold text-lg">100%</div><div className="text-xs text-mute">Server focus on guest care</div></div>
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-2 px-1 sm:px-0">
+            <div><div className="font-display font-extrabold text-lg sm:text-xl">42s</div><div className="text-[11px] sm:text-xs text-mute leading-snug">Table-to-Kitchen routing</div></div>
+            <div><div className="font-display font-extrabold text-lg sm:text-xl">+32%</div><div className="text-[11px] sm:text-xs text-mute leading-snug">Drink & dessert reorders</div></div>
+            <div><div className="font-display font-extrabold text-lg sm:text-xl">100%</div><div className="text-[11px] sm:text-xs text-mute leading-snug">Server focus on guest care</div></div>
           </div>
         </div>
 
@@ -91,7 +91,7 @@ export default function Hero() {
             onPointerLeave={stop}
           >
             <div
-              className="relative w-60 h-60 md:w-72 md:h-72 xl:w-80 xl:h-80"
+              className="relative w-52 h-52 sm:w-60 sm:h-60 md:w-72 md:h-72 xl:w-80 xl:h-80"
               style={{ transform: `rotateY(${angle}deg)`, transformStyle: 'preserve-3d' }}
             >
               {/* Front — logo */}

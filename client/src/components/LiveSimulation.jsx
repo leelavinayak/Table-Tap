@@ -45,8 +45,8 @@ export default function LiveSimulation() {
   };
 
   return (
-    <section id="demo" className="w-full py-16 bg-[#f3f4f5]">
-      <div className="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+    <section id="demo" className="w-full py-10 sm:py-16 bg-[#f3f4f5]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 md:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
         <div className="lg:col-span-6 flex flex-col gap-4">
           <div className="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-lg bg-white border text-sm font-semibold">
             <span className="material-symbols-outlined text-base">touch_app</span> Interactive Guest Interface

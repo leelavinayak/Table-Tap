@@ -11,7 +11,11 @@ const reservationRoutes = require('./routes/reservations');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: process.env.CLIENT_URL?.split(',') || '*' }));
+const clientOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map(s => s.trim()).filter(Boolean)
+  : ['*'];
+
+app.use(cors({ origin: clientOrigins.includes('*') ? '*' : clientOrigins }));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
@@ -51,4 +55,4 @@ mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 3000 })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.warn('MongoDB not available, running in demo memory mode:', err.message));
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
