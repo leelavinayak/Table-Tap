@@ -76,9 +76,29 @@ export default function LiveSimulation() {
               <div className="bg-white pt-2.5 pb-1 flex justify-center">
                 <span className="w-2.5 h-2.5 rounded-full bg-black ring-2 ring-gray-200" title="front camera" />
               </div>
-              <div className="bg-white px-3 pb-2 flex items-center justify-between shadow-sm">
-                <div className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-black"></span><span className="text-[10px] font-bold tracking-wider">{tab.table}</span></div>
-                <span className="text-[11px] text-mute">Tab #8492</span>
+              <div className="bg-white px-3 pt-1 pb-2 shadow-sm flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="relative shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-ink text-white flex items-center justify-center text-sm font-extrabold">
+                      <img src="Table_Tap_Logo.png" alt="" />
+                    </div>
+                    {/* <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-white flex items-center justify-center">
+                      <span className="material-symbols-outlined text-white text-[8px] font-bold">check</span>
+                    </span> */}
+                  </div>
+                  <div className="leading-tight">
+                    <div className="text-[12px] font-extrabold tracking-tight">Table Tap</div>
+                    {/* <div className="text-[10px] text-mute font-semibold">{tab.table.includes('•') ? tab.table : 'TABLE 08'} • Tab #{tab.tabId}</div> */}
+                  </div>
+                </div>
+                <button className="relative w-9 h-9 rounded-full bg-gray-100 hover:bg-ink hover:text-white transition flex items-center justify-center" title="View cart">
+                  <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                  {tab.items.length > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-ink text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-white">
+                      {tab.items.reduce((n, it) => n + (it.qty || 1), 0)}
+                    </span>
+                  )}
+                </button>
               </div>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 no-scrollbar">
                 <div className="bg-white p-3 rounded-xl shadow-sm flex items-center justify-between">
