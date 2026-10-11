@@ -64,7 +64,24 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/reservations', reservationRoutes);
 
+// Backwards-compat aliases: if a deployed frontend was built with
+// VITE_API_URL=https://backend.onrender.com (missing /api suffix),
+// it will POST to /leads instead of /api/leads and get Express's
+// default HTML "Cannot POST /leads". Accept both.
+app.use('/restaurants', restaurantRoutes);
+app.use('/orders', orderRoutes);
+app.use('/leads', leadRoutes);
+app.use('/reservations', reservationRoutes);
+
 app.get('/', (req, res) => res.send('Table Tap API running. Try /api/health'));
+
+// JSON 404 (must be after all routes, before error handler) so the
+// frontend never sees HTML "<pre>Cannot POST /leads</pre>".
+app.use((req, res) => {
+  res.status(404).json({
+    error: `Cannot ${req.method} ${req.path}. API base is /api (e.g. POST /api/leads). Check VITE_API_URL ends with /api.`
+  });
+});
 
 // Always return JSON errors (so frontend never sees HTML "Server rejected")
 app.use((err, req, res, next) => {

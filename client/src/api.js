@@ -1,9 +1,22 @@
 import axios from 'axios';
 
-const rawBase = import.meta.env.VITE_API_URL || '/api';
+const raw = (import.meta.env.VITE_API_URL || '/api').trim();
+// Normalize: allow users to set VITE_API_URL to either
+//   https://backend.onrender.com/api  (correct)
+// or https://backend.onrender.com      (missing /api — auto-fix)
+// Vite bakes this at build time, so a wrong value breaks deploys
+// with "Cannot POST /leads".
+function normalizeBase(v) {
+  const noSlash = v.replace(/\/$/, '');
+  if (noSlash === '/api' || noSlash.endsWith('/api')) return noSlash;
+  // If it's an absolute URL without /api suffix, append it.
+  if (/^https?:\/\//i.test(noSlash)) return `${noSlash}/api`;
+  return noSlash;
+}
+const normalized = normalizeBase(raw);
 
 const api = axios.create({
-  baseURL: rawBase.replace(/\/$/, ''),
+  baseURL: normalized,
   timeout: 30000
 });
 

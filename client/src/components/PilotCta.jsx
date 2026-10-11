@@ -63,6 +63,11 @@ export default function PilotCta() {
         if (status === 500 && (!raw || raw === '{}' || raw.length < 5)) {
           throw new Error('Connection reset (proxy ECONNRESET): backend restarted while sending (nodemon watches files). Fixed now — fully stop server (Ctrl+C), run `npm run dev` again with latest code (nodemon ignores outbox/), wait for “Server running on :5000”, then submit once more.');
         }
+        // Deployed 404 "Cannot POST /leads" = VITE_API_URL missing /api suffix.
+        if (status === 404 && /cannot post \/leads/i.test(raw)) {
+          const base = import.meta.env.VITE_API_URL || '(not set)';
+          throw new Error(`API path mismatch (404 Cannot POST /leads). Frontend is calling ${base}/leads but backend expects ${base}/api/leads. Fix: set VITE_API_URL to https://your-backend.onrender.com/api (must end with /api) in Vercel → Settings → Environment Variables, then Redeploy. Backend code now also accepts /leads, so redeploying the backend alone fixes old frontends.`);
+        }
         const detail = typeof data === 'string' ? data.slice(0, 300) : (data?.error || JSON.stringify(data || {}).slice(0, 300));
         throw new Error(`Server error ${status}: ${detail || 'no details'}. Restart server with latest code (npm run dev:server) and retry.`);
       }
