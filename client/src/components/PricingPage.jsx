@@ -1,15 +1,15 @@
 const plans = [
   {
-    name: 'Starter',
-    price: '$49',
-    per: '/month per venue',
-    desc: 'For single cafes & small bistros getting started with QR ordering.',
-    features: ['Up to 20 tables', 'QR + NFC stands included', 'Basic menu sync'],
+    name: '6 Months',
+    price: '₹6,999',
+    per: 'per venue · 6 months',
+    desc: 'For settled venues locking in 6 months with savings vs monthly.',
+    features: ['15 QR Stickers providing', 'All POS integrations', '2-tap reorders + split pay', 'One admin portal included', 'Live order tracking', 'History exploring + download history', 'Calendar-based dashboard'],
     comingSoon: true
   },
   {
     name: /*'Growth'*/ 'Current Plan',
-    price: '1499',
+    price: '₹1,299',
     per: '/month per venue',
     desc: 'For busy dine-in & bars. Most popular joining plan.',
     features: ['10 QR Stickers providing', 'All POS integrations', '2-tap reorders + split pay', 'One admin portal included', 'Live order tracking', 'History exploring + download history', 'Calendar-based dashboard'],
@@ -17,11 +17,11 @@ const plans = [
     comingSoon: true
   },
   {
-    name: 'Chain / Enterprise',
-    price: 'Custom',
-    per: 'annual billing',
-    desc: 'For groups with 5+ venues, custom hardware & onboarding.',
-    features: ['Unlimited tables', 'Multi-venue dashboard', 'Dedicated manager'],
+    name: '1 Year',
+    price: '₹11,999',
+    per: 'per venue · 12 months',
+    desc: 'For committed venues — biggest savings with a full year.',
+    features: ['20 QR Stickers providing', 'All POS integrations', '2-tap reorders + split pay', 'One admin portal included', 'Live order tracking', 'History exploring + download history', 'Calendar-based dashboard'],
     comingSoon: true
   }
 ];
@@ -44,45 +44,33 @@ export default function PricingPage() {
         {plans.map(p => (
           <div
             key={p.name}
-            className={`relative overflow-hidden rounded-2xl border p-6 flex flex-col gap-3 ${p.popular ? 'bg-ink text-white border-ink shadow-sm' : 'bg-white border-line opacity-90'}`}
+            className={`relative overflow-hidden rounded-2xl border p-6 flex flex-col gap-3 ${p.popular ? 'bg-ink text-white border-ink shadow-sm' : 'bg-white border-line'}`}
           >
-            {!p.popular && (
-              <>
-                <div className="pointer-events-none absolute inset-0 bg-white/30 z-[5]" />
-                <div className="pointer-events-none absolute left-[-30%] right-[-30%] top-1/2 -translate-y-1/2 -rotate-45 bg-black text-white text-sm font-extrabold uppercase tracking-[0.3em] text-center py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] z-10">
-                  Coming Soon
-                </div>
-              </>
-            )}
             {p.popular ? (
               <span className="flex flex-wrap gap-2">
                 <span className="self-start px-2.5 py-1 rounded-full bg-white text-ink text-[11px] font-extrabold">MOST POPULAR</span>
               </span>
             ) : null}
             <h2 className="font-extrabold text-lg">{p.name}</h2>
-            {p.popular && (
-              <>
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display font-extrabold text-3xl">{p.price}</span>
-                  <span className="text-xs text-gray-300">{p.per}</span>
-                </div>
-                <p className="text-sm text-gray-300">{p.desc}</p>
-                <ul className="space-y-2 mt-1">
-                  {p.features.map(f => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <span className="material-symbols-outlined text-base">check_circle</span>{f}
-                    </li>
-                  ))}
-                </ul>
-                {p.comingSoon && (
-                  <p className="text-xs italic mt-1 text-amber-300">Coming soon we are going to launch this plan first.</p>
-                )}
-              </>
+            <div className="flex items-baseline gap-1">
+              <span className="font-display font-extrabold text-3xl">{p.price}</span>
+              <span className={`text-xs ${p.popular ? 'text-gray-300' : 'text-mute'}`}>{p.per}</span>
+            </div>
+            <p className={`text-sm ${p.popular ? 'text-gray-300' : 'text-mute'}`}>{p.desc}</p>
+            <ul className="space-y-2 mt-1">
+              {p.features.map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm">
+                  <span className="material-symbols-outlined text-base">check_circle</span>{f}
+                </li>
+              ))}
+            </ul>
+            {p.comingSoon && (
+              <p className={`text-xs italic mt-1 ${p.popular ? 'text-amber-300' : 'text-amber-600'}`}>Coming soon we are going to launch this plan first.</p>
             )}
-            {p.popular && !p.comingSoon ? (
+            {!p.comingSoon ? (
               <a
                 href="#/add-restaurant"
-                className="mt-auto text-center px-4 py-2.5 rounded-xl text-sm font-bold bg-white text-ink hover:bg-gray-100"
+                className={`mt-auto text-center px-4 py-2.5 rounded-xl text-sm font-bold ${p.popular ? 'bg-white text-ink hover:bg-gray-100' : 'bg-ink text-white hover:bg-black'}`}
               >
                 Add Your Restaurant
               </a>

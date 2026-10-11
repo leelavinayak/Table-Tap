@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const Lead = require('../models/Lead');
@@ -22,6 +23,27 @@ function getBrandLogoAttachment() {
     }
   } catch {}
   return null;
+}
+
+function generateRestaurantId() {
+  // 12-digit numeric ID, first digit 1-9 so it is always 12 digits
+  let id = String(crypto.randomInt(1, 10));
+  for (let i = 1; i < 12; i++) id += String(crypto.randomInt(0, 10));
+  return id;
+}
+
+async function generateUniqueRestaurantId() {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const id = generateRestaurantId();
+    if (mongoose.connection.readyState !== 1) return id;
+    try {
+      const exists = await Lead.exists({ restaurantId: id });
+      if (!exists) return id;
+    } catch {
+      return id;
+    }
+  }
+  return generateRestaurantId();
 }
 
 function esc(s) {
@@ -77,22 +99,50 @@ router.get('/test-email', async (req, res) => {
   }
 });
 
-// POST /api/leads { restaurantName, email, phone, city, tables, gst, logoImage }
+// POST /api/leads { restaurantName, email, phone, address, state, pincode, partnerRestaurantId?, source?, city, tables, gst }
+// source 'add-restaurant' = Add Restaurant form (optional 12-digit partner ID, no new ID minted).
+// anything else = Join-as-Partner flow (backend mints a 12-digit Restaurant ID).
 router.post('/', async (req, res) => {
-  const { restaurantName, email, phone = '', city = '', tables = '', gst = '', logoImage = '' } = req.body;
+  const { restaurantName, email, phone = '', address = '', state = '', pincode = '', partnerRestaurantId = '', source = '', city = '', tables = '', gst = '', logoImage = '' } = req.body;
   if (!restaurantName || !email) return res.status(400).json({ error: 'Restaurant name and email required' });
+  if (!address || !String(address).trim()) return res.status(400).json({ error: 'Restaurant address required' });
+  if (!state || !String(state).trim()) return res.status(400).json({ error: 'State selection required' });
+  if (!/^\d{6}$/.test(String(pincode || '').trim())) return res.status(400).json({ error: 'Enter a valid 6-digit pincode' });
+  const cleanAddress = String(address).trim().slice(0, 500);
+  const cleanState = String(state).trim().slice(0, 100);
+  const cleanPincode = String(pincode).trim();
+  const givenPartnerId = String(partnerRestaurantId || '').trim();
+  if (givenPartnerId && !/^\d{12}$/.test(givenPartnerId)) return res.status(400).json({ error: 'Restaurant ID must be 12 digits, or leave it blank' });
+  const isAddRestaurant = source === 'add-restaurant';
   try {
+    let restaurantId = null;
+    let partnerMatch = null;
     let lead;
-    if (mongoose.connection.readyState === 1) {
-      lead = await Lead.create({ restaurantName, email, phone, city, tables, gst, logoImage });
+    if (isAddRestaurant) {
+      // Optional partner ID: verify it against existing partner records (when DB is up).
+      if (givenPartnerId && mongoose.connection.readyState === 1) {
+        try {
+          partnerMatch = await Lead.findOne({ restaurantId: givenPartnerId }).lean();
+        } catch { partnerMatch = null; }
+      }
+      const doc = { restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, partnerRestaurantId: givenPartnerId, source: 'add-restaurant', city, tables, gst };
+      if (mongoose.connection.readyState === 1) {
+        lead = await Lead.create(doc);
+      } else {
+        lead = { ...doc, _id: 'demo-' + Date.now() };
+      }
     } else {
-      lead = { restaurantName, email, phone, city, tables, gst, _id: 'demo-' + Date.now() };
+      restaurantId = await generateUniqueRestaurantId();
+      if (mongoose.connection.readyState === 1) {
+        lead = await Lead.create({ restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, source: 'partner', city, tables, gst, logoImage });
+      } else {
+        lead = { restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, source: 'partner', city, tables, gst, _id: 'demo-' + Date.now() };
+      }
     }
 
     const emailStatus = { restaurant: null, admin: null };
-    const hasLogo = Boolean(logoImage && logoImage.startsWith('data:image'));
 
-    // 1) Email to the restaurant (awaited so failures are visible)
+    // 1) Email to the restaurant (awaited so failures are visible) — includes 12-digit Restaurant ID
     // Palette: https://coolors.co/palette/f8f9fa-e9ecef-dee2e6-ced4da-adb5bd-6c757d-495057-343a40-212529
     try {
       const brandLogo = getBrandLogoAttachment();
@@ -101,19 +151,31 @@ router.post('/', async (req, res) => {
         : `<div style="font-size:26px;font-weight:800;letter-spacing:0.5px;color:#f8f9fa;margin:0;">Table Tap</div>`;
       emailStatus.restaurant = await sendMail({
         to: email,
-        subject: 'Thank you for joining as a Partner – Table Tap',
-        text: `Dear ${restaurantName},\n\nThanks for joining as a Partner on Table Tap!\n\nYour logo is going to be added within 24 hours on our site. Thank you.\n\nWe will inform you to register for the access — Coming Soon. Thank you.\n\n— Team Table Tap`,
+        subject: isAddRestaurant ? 'Thank you – Table Tap received your restaurant details' : `Thank you for joining as a Partner – Your Restaurant ID ${restaurantId}`,
+        text: isAddRestaurant
+          ? `Dear ${restaurantName},\n\nThanks for adding your restaurant on Table Tap!\n\nWe have received your details and our team will contact you shortly.\n\nRestaurant: ${restaurantName}\nAddress: ${cleanAddress}\nState: ${cleanState}\nPincode: ${cleanPincode}\n${givenPartnerId ? `Partner Restaurant ID on record: ${givenPartnerId}\n` : ''}\nWe will inform you to register for the access — Coming Soon. Thank you.\n\n— Team Table Tap`
+          : `Dear ${restaurantName},\n\nThanks for joining as a Partner on Table Tap!\n\nYour 12-digit Restaurant ID is: ${restaurantId}\n\nPlease keep this ID safe — you will need it for registration/access.\n\nRestaurant: ${restaurantName}\nAddress: ${cleanAddress}\nState: ${cleanState}\nPincode: ${cleanPincode}\n\nWe will inform you to register for the access — Coming Soon. Thank you.\n\n— Team Table Tap`,
         html: `
           <div style="background:#e9ecef;padding:24px;font-family:Arial,Helvetica,sans-serif;">
             <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dee2e6;border-radius:14px;overflow:hidden;">
               <div style="background:#212529;padding:28px 24px 22px;text-align:center;">
                 ${brandImg}
-                <p style="margin:12px 0 0;color:#adb5bd;font-weight:bold;letter-spacing:3px;font-size:11px;">JOIN AS A PARTNER</p>
+                <p style="margin:12px 0 0;color:#adb5bd;font-weight:bold;letter-spacing:3px;font-size:11px;">${isAddRestaurant ? 'ADD RESTAURANT' : 'JOIN AS A PARTNER'}</p>
               </div>
               <div style="background:#ffffff;padding:26px 24px;color:#212529;">
                 <p style="margin:0 0 10px;font-size:14px;">Dear ${esc(restaurantName)},</p>
-                <p style="margin:0 0 10px;font-size:14px;">Thanks for joining as a Partner on Table Tap!</p>
-                <p style="margin:0 0 10px;font-size:14px;">Your logo is going to be added within the coming 24 hours on our site. Thank you.</p>
+                ${isAddRestaurant
+                  ? `<p style="margin:0 0 10px;font-size:14px;">Thanks for adding your restaurant on Table Tap! We have received your details and our team will contact you shortly.</p>
+                ${givenPartnerId ? `<div style="margin:14px 0;padding:16px;background:#f8f9fa;border:1px dashed #adb5bd;border-radius:10px;text-align:center;">
+                  <p style="margin:0;font-size:12px;color:#6c757d;letter-spacing:1px;font-weight:bold;">PARTNER RESTAURANT ID ON RECORD</p>
+                  <p style="margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:4px;color:#212529;">${esc(givenPartnerId)}</p>
+                </div>` : ''}`
+                  : `<p style="margin:0 0 10px;font-size:14px;">Thanks for joining as a Partner on Table Tap!</p>
+                <div style="margin:14px 0;padding:16px;background:#f8f9fa;border:1px dashed #adb5bd;border-radius:10px;text-align:center;">
+                  <p style="margin:0;font-size:12px;color:#6c757d;letter-spacing:1px;font-weight:bold;">YOUR 12-DIGIT RESTAURANT ID</p>
+                  <p style="margin:6px 0 0;font-size:28px;font-weight:800;letter-spacing:4px;color:#212529;">${esc(restaurantId)}</p>
+                </div>
+                <p style="margin:10px 0 6px;font-size:14px;">Please keep this ID safe — you will need it for registration/access.</p>`}
                 <p style="margin:0 0 6px;font-size:14px;">We will inform you to register for the access — Coming Soon. Thank you.</p>
                 <p style="margin:16px 0 0;font-size:14px;">— Team Table Tap</p>
               </div>
@@ -127,7 +189,7 @@ router.post('/', async (req, res) => {
       });
     } catch (mailErr) {
       console.warn('Restaurant email failed:', mailErr.message);
-      emailStatus.restaurant = { error: mailErr.message, outbox: saveOutbox({ restaurantName, email, phone, city, tables, gst, logoImage, type: 'restaurant-email-failed' }) };
+      emailStatus.restaurant = { error: mailErr.message, outbox: saveOutbox({ restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, partnerRestaurantId: givenPartnerId, source: isAddRestaurant ? 'add-restaurant' : 'partner', city, tables, gst, logoImage, type: 'restaurant-email-failed' }) };
     }
 
     // 2) Message to admin
@@ -136,30 +198,36 @@ router.post('/', async (req, res) => {
       try {
         const safe = String(restaurantName || 'restaurant').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 40) || 'restaurant';
         const attach = logoAttachment(logoImage, safe);
+        const hasLogo = Boolean(logoImage && String(logoImage).startsWith('data:image'));
         emailStatus.admin = await sendMail({
           to: adminMail,
-          subject: `New Partner Registration – ${restaurantName}`,
-          text: `New Join-as-Partner submission:\n\nRestaurant: ${restaurantName}\nEmail: ${email}\nPhone: ${phone}\nCity: ${city}\nTables: ${tables}\nGST: ${gst}\nLogo received: ${hasLogo ? 'Yes' : 'No'}\nTime: ${new Date().toISOString()}`,
+          subject: isAddRestaurant ? `New Add-Restaurant submission – ${restaurantName}${givenPartnerId ? ` – Partner ID ${givenPartnerId}` : ''}` : `New Partner Registration – ${restaurantName} – ID ${restaurantId}`,
+          text: isAddRestaurant
+            ? `New Add-Restaurant submission:\n\nRestaurant: ${restaurantName}\nEmail: ${email}\nPhone: ${phone}\nAddress: ${cleanAddress}\nState: ${cleanState}\nPincode: ${cleanPincode}\nPartner Restaurant ID (given): ${givenPartnerId || '—'}\nPartner record found: ${givenPartnerId ? (partnerMatch ? `Yes (${partnerMatch.restaurantName || ''})` : 'No') : '—'}\nCity: ${city}\nTables: ${tables}\nGST: ${gst}\nTime: ${new Date().toISOString()}`
+            : `New Join-as-Partner submission:\n\nRestaurant: ${restaurantName}\nEmail: ${email}\nPhone: ${phone}\nAddress: ${cleanAddress}\nState: ${cleanState}\nPincode: ${cleanPincode}\nRestaurant ID: ${restaurantId}\nCity: ${city}\nTables: ${tables}\nGST: ${gst}\nTime: ${new Date().toISOString()}`,
           html: `
             <div style="background:#e9ecef;padding:24px;font-family:Arial,Helvetica,sans-serif;">
               <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #dee2e6;border-radius:14px;overflow:hidden;">
                 <div style="background:#212529;padding:18px 24px;">
-                  <p style="margin:0;color:#f8f9fa;font-size:15px;font-weight:800;">New Join-as-Partner submission</p>
-                  <p style="margin:4px 0 0;color:#adb5bd;font-size:12px;">${esc(restaurantName)} · ${new Date().toISOString()}</p>
+                  <p style="margin:0;color:#f8f9fa;font-size:15px;font-weight:800;">${isAddRestaurant ? 'New Add-Restaurant submission' : 'New Join-as-Partner submission'}</p>
+                  <p style="margin:4px 0 0;color:#adb5bd;font-size:12px;">${esc(restaurantName)} · ${isAddRestaurant ? (givenPartnerId ? `Partner ID ${esc(givenPartnerId)}` : 'no partner ID given') : `ID ${esc(restaurantId)}`} · ${new Date().toISOString()}</p>
                 </div>
                 <div style="padding:20px 24px;">
                   <ul style="margin:0;padding:0;list-style:none;font-size:14px;color:#212529;line-height:1.9;">
                     <li><b>Restaurant:</b> ${esc(restaurantName)}</li>
                     <li><b>Email:</b> ${esc(email)}</li>
                     <li><b>Phone:</b> ${esc(phone)}</li>
+                    <li><b>Address:</b> ${esc(cleanAddress)}</li>
+                    <li><b>State:</b> ${esc(cleanState)}</li>
+                    <li><b>Pincode:</b> ${esc(cleanPincode)}</li>
+                    ${isAddRestaurant
+                      ? `<li><b>Partner Restaurant ID (given):</b> ${esc(givenPartnerId) || '—'}</li>
+                    <li><b>Partner record found:</b> ${givenPartnerId ? (partnerMatch ? `Yes (${esc(partnerMatch.restaurantName || '')})` : 'No') : '—'}</li>`
+                      : `<li><b>Restaurant ID:</b> ${esc(restaurantId)}</li>`}
                     <li><b>City:</b> ${esc(city)}</li>
                     <li><b>Tables:</b> ${esc(tables)}</li>
                     <li><b>GST:</b> ${esc(gst)}</li>
-                    <li><b>Logo received:</b> ${hasLogo ? 'Yes' : 'No'}</li>
                   </ul>
-                </div>
-                <div style="background:#343a40;padding:12px 24px;">
-                  <p style="margin:0;font-size:11px;color:#e9ecef;">Logo file is attached${hasLogo ? '' : ' (none received)'} — add it on the Partners page manually.</p>
                 </div>
               </div>
             </div>`,
@@ -167,7 +235,7 @@ router.post('/', async (req, res) => {
         });
       } catch (mailErr) {
         console.warn('Admin email failed:', mailErr.message);
-        emailStatus.admin = { error: mailErr.message, outbox: saveOutbox({ restaurantName, email, phone, city, tables, gst, logoImage, type: 'admin-email-failed' }) };
+        emailStatus.admin = { error: mailErr.message, outbox: saveOutbox({ restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, partnerRestaurantId: givenPartnerId, source: isAddRestaurant ? 'add-restaurant' : 'partner', city, tables, gst, logoImage, type: 'admin-email-failed' }) };
       }
     } else {
       console.log('[mailer] ADMIN_EMAIL not set — skipping admin notification');

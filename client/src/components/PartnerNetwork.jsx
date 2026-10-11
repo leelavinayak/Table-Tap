@@ -64,7 +64,7 @@ export default function PartnerNetwork() {
         <div className="text-[11px] uppercase tracking-widest text-mute font-bold">Global Footprint</div>
         <h2 className="font-display font-extrabold text-xl md:text-2xl tracking-tight">Trusted by Premier Dining Destinations</h2>
         <div className="inline-flex items-center justify-center gap-2 mt-1">
-          <span className="px-3 py-1 rounded-full bg-ink text-white text-sm font-extrabold">540+ Partner Restaurants</span>
+          <span className="px-3 py-1 rounded-full bg-ink text-white text-sm font-extrabold">10+ Partner Restaurants</span>
         </div>
       </div>
 

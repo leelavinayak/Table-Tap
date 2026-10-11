@@ -1,52 +1,50 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { submitLead } from '../api';
-import { fileToDataUrl } from '../utils/partners';
+
+const STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu', 'Delhi',
+  'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
 
 export default function PilotCta() {
-  const [form, setForm] = useState({ restaurantName: '', email: '', phone: '' });
-  const [logoPreview, setLogoPreview] = useState('');
-  const [logoFileName, setLogoFileName] = useState('');
-  const [state, setState] = useState({ loading: false, ok: false, err: '' });
-  const fileRef = useRef(null);
-
-  const onLogoChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setState({ loading: false, ok: false, err: 'Please upload an image file (PNG/JPG) for your logo.' });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setState({ loading: false, ok: false, err: 'Logo must be under 5MB.' });
-      return;
-    }
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setLogoPreview(dataUrl);
-      setLogoFileName(file.name);
-      setState(s => ({ ...s, err: '' }));
-    } catch {
-      setState({ loading: false, ok: false, err: 'Could not read logo image.' });
-    }
-  };
+  const [form, setForm] = useState({ restaurantName: '', email: '', phone: '', address: '', state: '', pincode: '' });
+  const [state, setState] = useState({ loading: false, ok: false, err: '', restaurantId: '' });
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!logoPreview) {
-      setState({ loading: false, ok: false, err: 'Please upload your restaurant logo to join as a partner.' });
+    if (!form.address.trim()) {
+      setState({ loading: false, ok: false, err: 'Please enter your restaurant address.', restaurantId: '' });
       return;
     }
-    setState({ loading: true, ok: false, err: '' });
+    if (!form.state) {
+      setState({ loading: false, ok: false, err: 'Please select your state.', restaurantId: '' });
+      return;
+    }
+    if (!/^\d{6}$/.test(form.pincode.trim())) {
+      setState({ loading: false, ok: false, err: 'Please enter a valid 6-digit pincode.', restaurantId: '' });
+      return;
+    }
+    setState({ loading: true, ok: false, err: '', restaurantId: '' });
     try {
-      // Register on backend — details + logo go to admin email + leads DB.
-      // Logo is added on Partners page manually by admin (no auto-showcase).
+      // Register on backend — details go to admin email + leads DB.
+      // Backend generates a 12-digit Restaurant ID and emails it to the restaurant.
       let leadResp = null;
       try {
         leadResp = await submitLead({
           restaurantName: form.restaurantName,
           email: form.email,
           phone: form.phone,
-          logoImage: logoPreview
+          address: form.address.trim(),
+          state: form.state,
+          pincode: form.pincode.trim(),
+          source: 'partner'
         });
       } catch (apiErr) {
         if (apiErr.code === 'ECONNABORTED') {
@@ -54,7 +52,7 @@ export default function PilotCta() {
         }
         if (!apiErr.response) {
           const base = import.meta.env.VITE_API_URL || '/api (same-origin)';
-          throw new Error(`Could not reach API at ${base}. ${window.location.hostname === 'localhost' ? '1) Run \`npm run dev\` from project root. 2) Open http://localhost:5000/api/health — must return ok:true. 3) Keep that terminal open, then submit again.' : 'Deployed frontend must set VITE_API_URL to your backend URL + /api (e.g. https://your-backend.onrender.com/api) and backend CLIENT_URL must include this frontend domain. Then redeploy frontend.'} No email was sent.`);
+          throw new Error(`Could not reach API at ${base}. ${window.location.hostname === 'localhost' ? '1) Run `npm run dev` from project root. 2) Open http://localhost:5000/api/health — must return ok:true. 3) Keep that terminal open, then submit again.' : 'Deployed frontend must set VITE_API_URL to your backend URL + /api (e.g. https://your-backend.onrender.com/api) and backend CLIENT_URL must include this frontend domain. Then redeploy frontend.'} No email was sent.`);
         }
         const status = apiErr.response?.status;
         const data = apiErr.response?.data;
@@ -72,6 +70,7 @@ export default function PilotCta() {
         throw new Error(`Server error ${status}: ${detail || 'no details'}. Restart server with latest code (npm run dev:server) and retry.`);
       }
 
+      const restaurantId = leadResp?.lead?.restaurantId || leadResp?.restaurantId || '';
       const rMail = leadResp?.emails?.restaurant;
       const aMail = leadResp?.emails?.admin;
       if (rMail?.error || rMail?.skipped) {
@@ -81,13 +80,10 @@ export default function PilotCta() {
         console.warn('Admin email issue:', aMail?.error);
       }
 
-      setState({ loading: false, ok: true, err: '' });
-      setForm({ restaurantName: '', email: '', phone: '' });
-      setLogoPreview('');
-      setLogoFileName('');
-      if (fileRef.current) fileRef.current.value = '';
+      setState({ loading: false, ok: true, err: '', restaurantId });
+      setForm({ restaurantName: '', email: '', phone: '', address: '', state: '', pincode: '' });
     } catch (err) {
-      setState({ loading: false, ok: false, err: err.message || err.response?.data?.error || 'Could not submit. Is API running on :5000?' });
+      setState({ loading: false, ok: false, err: err.message || err.response?.data?.error || 'Could not submit. Is API running on :5000?', restaurantId: '' });
     }
   };
 
@@ -102,17 +98,17 @@ export default function PilotCta() {
             </div>
             <h2 className="font-display font-extrabold text-[22px] sm:text-2xl md:text-3xl tracking-tight leading-tight mt-3">Join as a Table Tap partner restaurant</h2>
             <p className="text-gray-300 mt-2 text-[15px] sm:text-sm leading-relaxed">
-              Add your restaurant details and logo — our admin will add it on the partners page.
+              Add your restaurant details with address — your 12-digit Restaurant ID will be sent to your registered email.
             </p>
             <ul className="mt-4 space-y-2 text-[13px] sm:text-sm text-gray-300 hidden sm:block">
-              <li className="flex items-center gap-2"><span className="material-symbols-outlined text-base text-amber-300">check_circle</span>Free 14-day pilot · no credit card</li>
-              <li className="flex items-center gap-2"><span className="material-symbols-outlined text-base text-amber-300">check_circle</span>Logo live on Partners page within 24 hrs</li>
+              <li className="flex items-center gap-2"><span className="material-symbols-outlined text-base text-amber-300">check_circle</span>Adding you restaurant logo in Table Tap site</li>
+              <li className="flex items-center gap-2"><span className="material-symbols-outlined text-base text-amber-300">check_circle</span>12-digit Restaurant ID sent to your email</li>
             </ul>
           </div>
           <form onSubmit={submit} className="w-full lg:max-w-md bg-white text-black p-5 sm:p-6 rounded-3xl shadow-lg flex flex-col gap-4">
             <div>
               <div className="font-bold text-[17px]">Register as a Partner</div>
-              <div className="text-[13px] sm:text-sm text-gray-500 mt-0.5">Details + logo go to admin — logo added manually within 24 hours.</div>
+              <div className="text-[13px] sm:text-sm text-gray-500 mt-0.5">Details go to admin — Restaurant ID sent to your email.</div>
             </div>
             <div>
               <label className="tt-label">Restaurant Name *</label>
@@ -131,31 +127,36 @@ export default function PilotCta() {
                 className="tt-input" placeholder="+91 9999999999" />
             </div>
             <div>
-              <label className="tt-label">Upload Restaurant Logo / Image *</label>
-              <div className="mt-1.5 flex items-center gap-3 bg-soft border border-dashed border-line rounded-2xl p-3">
-                <div className="w-14 h-14 rounded-2xl bg-white border border-line overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
-                  {logoPreview ? (
-                    <img src={logoPreview} alt="logo preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="material-symbols-outlined text-gray-400">restaurant</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <input ref={fileRef} type="file" accept="image/*" onChange={onLogoChange}
-                    className="w-full text-xs file:mr-2 file:px-4 file:py-2.5 file:rounded-xl file:border-0 file:bg-ink file:text-white file:text-xs file:font-bold file:cursor-pointer hover:file:bg-black" />
-                  {logoFileName && <div className="text-[11px] text-gray-500 mt-1 truncate">{logoFileName}</div>}
-                </div>
-                {logoPreview && (
-                  <button type="button" onClick={() => { setLogoPreview(''); setLogoFileName(''); if (fileRef.current) fileRef.current.value = ''; }}
-                    className="text-xs font-bold text-red-600 hover:underline shrink-0 px-2 py-2">Remove</button>
-                )}
+              <label className="tt-label">Restaurant Address *</label>
+              <textarea required value={form.address} onChange={e => setForm({ ...form, address: e.target.value })}
+                rows={3} maxLength={500}
+                className="tt-input resize-none" placeholder="Shop no, street, area, city" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="tt-label">State *</label>
+                <select required value={form.state} onChange={e => setForm({ ...form, state: e.target.value })}
+                  className="tt-input bg-white">
+                  <option value="">Select state</option>
+                  {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="tt-label">Pincode *</label>
+                <input required value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                  inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} title="Enter 6-digit pincode"
+                  className="tt-input" placeholder="e.g. 400001" />
               </div>
             </div>
             <button disabled={state.loading} className="tt-btn-primary">
               <span className="material-symbols-outlined text-base">storefront</span>
               {state.loading ? 'Registering…' : 'Join as a Partner'}
             </button>
-            {state.ok && <div className="text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg p-2.5">✓ Details sent to admin! Confirmation email sent — admin will add your logo manually within 24 hours.</div>}
+            {state.ok && (
+              <div className="text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg p-2.5">
+                ✓ Registered! Your 12-digit Restaurant ID{state.restaurantId ? `: ${state.restaurantId}` : ''} has been sent to your email.
+              </div>
+            )}
             {state.err && <div className="text-sm font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg p-2.5">{state.err}</div>}
             <div className="text-center text-xs text-gray-500">No credit card required. SOC-2 Type II Certified.</div>
           </form>

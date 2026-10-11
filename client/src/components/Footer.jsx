@@ -11,7 +11,7 @@ function goSection(id) {
 
 const sections = [
   { id: 'benefits', label: 'Why Table Tap' },
-  { id: 'partners', label: '540+ Partner Venues' },
+  { id: 'partners', label: '10+ Partner Venues' },
   { id: 'demo', label: 'Guest Ordering App' },
   { id: 'preorder', label: 'Pre-order + Reserve Table' },
 ];

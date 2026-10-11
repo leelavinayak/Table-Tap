@@ -70,7 +70,7 @@ export default function Hero() {
             </button>
             <button onClick={() => document.getElementById('partners')?.scrollIntoView({ behavior: 'smooth' })}
               className="w-full sm:w-auto justify-center px-5 py-3 rounded-xl bg-white border border-line text-sm font-bold shadow-sm active:scale-[0.99] transition flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">storefront</span> View 540+ Partner Restaurants
+              <span className="material-symbols-outlined text-base">storefront</span> View 10+ Partner Restaurants
             </button>
           </div>
           <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-2 px-1 sm:px-0">
