@@ -51,10 +51,14 @@ app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // Health
 app.get('/api/health', (req, res) => {
+  const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
   res.json({
     ok: true,
     service: 'table-tap-server',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'demo-memory-mode',
+    mongoState: states[mongoose.connection.readyState] || mongoose.connection.readyState,
+    mongoHost: mongoose.connection.host || null,
+    db: mongoose.connection.name || null,
     time: new Date().toISOString()
   });
 });
@@ -98,9 +102,26 @@ app.use((err, req, res, next) => {
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/tabletap';
 mongoose.set('bufferCommands', false);
-mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 3000 })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.warn('MongoDB not available, running in demo memory mode:', err.message));
+async function connectMongo(retries = 5) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 });
+      console.log(`MongoDB connected (attempt ${i}) host=${mongoose.connection.host} db=${mongoose.connection.name}`);
+      if (mongoose.connection.name === 'test') {
+        console.warn('[mongo] Connected to the default "test" database (MONGO_URI has no /dbname). Add /tabletap to MONGO_URI, e.g. mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/tabletap');
+      }
+      return;
+    } catch (err) {
+      console.warn(`MongoDB connection attempt ${i}/${retries} failed: ${err.message}`);
+      if (i === retries) {
+        console.warn('MongoDB not available, running in demo memory mode. Registrations will return 503 (NOT saved) until MONGO_URI is fixed and server is restarted.');
+      } else {
+        await new Promise(r => setTimeout(r, 2000 * i));
+      }
+    }
+  }
+}
+connectMongo();
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);

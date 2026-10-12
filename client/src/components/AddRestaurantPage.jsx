@@ -40,7 +40,7 @@ export default function AddRestaurantPage() {
     }
     setPageState({ loading: true, ok: false, err: '' });
     try {
-      await submitLead({
+      const resp = await submitLead({
         restaurantName: form.restaurantName,
         email: form.email,
         phone: form.phone,
@@ -52,6 +52,9 @@ export default function AddRestaurantPage() {
         city: form.city,
         gst: form.gst.toUpperCase().trim()
       });
+      if (resp?.persisted === false || resp?.demoMode) {
+        throw new Error(resp?.error || 'Database unavailable — details NOT saved. Start backend with a valid MONGO_URI and retry.');
+      }
       try {
         sessionStorage.setItem('tabletap_pending_restaurant', JSON.stringify({
           restaurantName: form.restaurantName,

@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const Lead = require('../models/Lead');
+const Restaurant = require('../models/Restaurant');
 const mongoose = require('mongoose');
 const { sendMail, logoAttachment, verifyMailer } = require('../utils/mailer');
 
@@ -114,29 +115,120 @@ router.post('/', async (req, res) => {
   const givenPartnerId = String(partnerRestaurantId || '').trim();
   if (givenPartnerId && !/^\d{12}$/.test(givenPartnerId)) return res.status(400).json({ error: 'Restaurant ID must be 12 digits, or leave it blank' });
   const isAddRestaurant = source === 'add-restaurant';
+  // Duplicate guard: one registration per restaurant email. If this email
+  // already registered, stop with 409 so the user sees "already registered"
+  // instead of creating a second record / second Restaurant ID.
+  const emailKey = String(email).trim();
+  const escRegex = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  try {
+    const existing = await Lead.findOne({
+      email: { $regex: `^${escRegex(emailKey)}$`, $options: 'i' }
+    }).lean();
+    if (existing) {
+      const existingId = existing.restaurantId ? ` Your 12-digit Restaurant ID is ${existing.restaurantId} — it was already sent to this email.` : ' Our team already has your details and will contact you shortly.';
+      return res.status(409).json({
+        error: `This restaurant email (${existing.email}) is already registered.${existingId}`,
+        persisted: false,
+        duplicate: true,
+        restaurantId: existing.restaurantId || undefined,
+        lead: existing
+      });
+    }
+  } catch (dupErr) {
+    // DB down here just means the duplicate check couldn't run — the real
+    // Lead.create below will fail fast and return 503 (not saved).
+    if (mongoose.connection.readyState !== 1) {
+      console.warn('[leads] duplicate check skipped (DB not connected):', dupErr.message);
+    } else {
+      console.warn('[leads] duplicate check failed:', dupErr.message);
+    }
+  }
   try {
     let restaurantId = null;
     let partnerMatch = null;
     let lead;
+    // Always attempt a real DB write first. With bufferCommands=false a
+    // disconnected Mongo throws immediately instead of hanging — we turn
+    // that into a 503 (NOT a fake 201) so the frontend never shows
+    // "Registered!" when nothing was stored.
+    const dbUp = () => mongoose.connection.readyState === 1;
     if (isAddRestaurant) {
       // Optional partner ID: verify it against existing partner records (when DB is up).
-      if (givenPartnerId && mongoose.connection.readyState === 1) {
+      if (givenPartnerId && dbUp()) {
         try {
           partnerMatch = await Lead.findOne({ restaurantId: givenPartnerId }).lean();
         } catch { partnerMatch = null; }
       }
       const doc = { restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, partnerRestaurantId: givenPartnerId, source: 'add-restaurant', city, tables, gst };
-      if (mongoose.connection.readyState === 1) {
+      try {
         lead = await Lead.create(doc);
-      } else {
-        lead = { ...doc, _id: 'demo-' + Date.now() };
+      } catch (dbErr) {
+        console.error('[leads] DB write failed (add-restaurant):', dbErr.message);
+        saveOutbox({ ...doc, type: 'db-unavailable' });
+        return res.status(503).json({
+          error: 'Database unavailable — details NOT saved. Check server terminal for MongoDB errors and ensure MONGO_URI is set, then retry.',
+          detail: dbErr.message,
+          persisted: false,
+          demoMode: !dbUp()
+        });
+      }
+      // Mirror into restaurants collection so the venue shows up in
+      // GET /api/restaurants + Partner Network.
+      try {
+        await Restaurant.findOneAndUpdate(
+          { email: String(email).toLowerCase(), name: restaurantName },
+          {
+            $set: {
+              name: restaurantName, email, phone,
+              address: cleanAddress, state: cleanState, pincode: cleanPincode,
+              city, tables, gst,
+              location: cleanAddress || city || '',
+              partnerRestaurantId: givenPartnerId,
+              source: 'add-restaurant',
+              category: 'Partner'
+            }
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+      } catch (syncErr) {
+        console.warn('[leads] restaurant sync failed (add-restaurant):', syncErr.message);
       }
     } else {
       restaurantId = await generateUniqueRestaurantId();
-      if (mongoose.connection.readyState === 1) {
-        lead = await Lead.create({ restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, source: 'partner', city, tables, gst, logoImage });
-      } else {
-        lead = { restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, source: 'partner', city, tables, gst, _id: 'demo-' + Date.now() };
+      const doc = { restaurantName, email, phone, address: cleanAddress, state: cleanState, pincode: cleanPincode, restaurantId, source: 'partner', city, tables, gst, logoImage };
+      try {
+        lead = await Lead.create(doc);
+      } catch (dbErr) {
+        console.error('[leads] DB write failed (partner):', dbErr.message);
+        saveOutbox({ ...doc, type: 'db-unavailable' });
+        return res.status(503).json({
+          error: 'Database unavailable — details NOT saved and no Restaurant ID was reserved. Check server terminal for MongoDB errors and ensure MONGO_URI is set, then retry.',
+          detail: dbErr.message,
+          persisted: false,
+          demoMode: !dbUp()
+        });
+      }
+      // Mirror partner into restaurants collection (upsert by 12-digit ID)
+      // so GET /api/restaurants includes newly registered partners.
+      try {
+        await Restaurant.findOneAndUpdate(
+          { restaurantId },
+          {
+            $set: {
+              name: restaurantName, email, phone,
+              address: cleanAddress, state: cleanState, pincode: cleanPincode,
+              city, tables, gst, logoImage,
+              image: logoImage || '',
+              location: cleanAddress || city || '',
+              restaurantId,
+              source: 'partner',
+              category: 'Partner'
+            }
+          },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+      } catch (syncErr) {
+        console.warn('[leads] restaurant sync failed (partner):', syncErr.message);
       }
     }
 
@@ -242,9 +334,10 @@ router.post('/', async (req, res) => {
       emailStatus.admin = { skipped: true, error: 'ADMIN_EMAIL not set in server/.env' };
     }
 
-    return res.status(201).json({ ok: true, lead, emails: emailStatus });
+    return res.status(201).json({ ok: true, lead, restaurantId: lead?.restaurantId || restaurantId || undefined, persisted: true, emails: emailStatus });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[leads] POST failed:', err.message);
+    res.status(500).json({ error: err.message, persisted: false });
   }
 });
 

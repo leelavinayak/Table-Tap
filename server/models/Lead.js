@@ -17,4 +17,6 @@ const leadSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+leadSchema.index({ email: 1 });
+
 module.exports = mongoose.model('Lead', leadSchema);

@@ -66,11 +66,18 @@ export default function PilotCta() {
           const base = import.meta.env.VITE_API_URL || '(not set)';
           throw new Error(`API path mismatch (404 Cannot POST /leads). Frontend is calling ${base}/leads but backend expects ${base}/api/leads. Fix: set VITE_API_URL to https://your-backend.onrender.com/api (must end with /api) in Vercel → Settings → Environment Variables, then Redeploy. Backend code now also accepts /leads, so redeploying the backend alone fixes old frontends.`);
         }
-        const detail = typeof data === 'string' ? data.slice(0, 300) : (data?.error || JSON.stringify(data || {}).slice(0, 300));
+        const detail = typeof data === 'string' ? data.slice(0, 400) : (data?.error || JSON.stringify(data || {}).slice(0, 400));
+        // Already registered — show the backend message as-is (it includes the existing Restaurant ID).
+        if (status === 409 || data?.duplicate) {
+          throw new Error(detail || 'This restaurant email is already registered.');
+        }
         throw new Error(`Server error ${status}: ${detail || 'no details'}. Restart server with latest code (npm run dev:server) and retry.`);
       }
 
       const restaurantId = leadResp?.lead?.restaurantId || leadResp?.restaurantId || '';
+      if (leadResp?.persisted === false || leadResp?.demoMode) {
+        throw new Error(leadResp?.error || 'Database unavailable — details NOT saved. Start backend with a valid MONGO_URI (see server/.env) and retry. No email was sent.');
+      }
       const rMail = leadResp?.emails?.restaurant;
       const aMail = leadResp?.emails?.admin;
       if (rMail?.error || rMail?.skipped) {
